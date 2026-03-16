@@ -23,7 +23,7 @@ N_PAPERS = 10  # 每个模型分析多少篇
 with open("config/config.yaml") as f:
     cfg = yaml.safe_load(f)
 
-api_key  = cfg["kimi"]["api_key"]
+api_key  = cfg["llm"]["api_key"]
 keywords = cfg["keywords"]
 system_prompt = build_system_prompt(keywords)
 

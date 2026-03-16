@@ -2,8 +2,8 @@
 论文抓取模块
 - arXiv：按类别+关键词抓取预印本（7天内）
 - Semantic Scholar：用 bulk search 按venue直接拉取最新论文（30天内）
-  - 专业期刊（TED/EDL/TCAD等）：全部送Kimi
-  - 综合期刊（APL/NC/NE）：先用关键词粗筛摘要，再送Kimi
+  - 专业期刊（TED/EDL/TCAD等）：全部送LLM分析
+  - 综合期刊（APL/NC/NE）：先用关键词粗筛摘要，再送LLM分析
 """
 
 import arxiv
@@ -62,7 +62,7 @@ def fetch_arxiv_papers(categories: List[str], core_keywords: List[str],
     return papers
 
 
-# 专业期刊：本身就是目标领域，全部送Kimi
+# 专业期刊：本身就是目标领域，全部送LLM分析
 SPECIALIST_VENUES = [
     "IEEE Transactions on Electron Devices",
     "IEEE Electron Device Letters",
@@ -72,7 +72,7 @@ SPECIALIST_VENUES = [
     "International Reliability Physics Symposium",
 ]
 
-# 综合期刊：覆盖面广，需要关键词粗筛后再送Kimi
+# 综合期刊：覆盖面广，需要关键词粗筛后再送LLM分析
 BROAD_VENUES = [
     "Nature Electronics",
     "Nature Communications",
@@ -171,7 +171,7 @@ def fetch_semantic_scholar_papers(venues: List[str],
                                    api_key: str = "") -> List[Dict]:
     """
     用 bulk search API 按venue拉取最新论文（30天内）。
-    专业期刊全部送Kimi；综合期刊先用 core+broad 关键词粗筛再送Kimi。
+    专业期刊全部送LLM分析；综合期刊先用 core+broad 关键词粗筛再送LLM分析。
     """
     papers = []
     seen_ids = set()

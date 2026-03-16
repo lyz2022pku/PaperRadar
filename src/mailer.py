@@ -74,7 +74,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <div class="container">
   <div class="header">
     <h1>📡 PaperRadar · 每日论文精选</h1>
-    <div class="meta">{date} &nbsp;·&nbsp; arXiv + Semantic Scholar &nbsp;·&nbsp; Kimi AI 分析</div>
+    <div class="meta">{date} &nbsp;·&nbsp; arXiv + Semantic Scholar &nbsp;·&nbsp; AI 分析</div>
   </div>
   <div class="weight-bar">
     <span class="label">今日推送权重：</span>
@@ -103,7 +103,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </div>
   {papers_html}
   <div class="footer">
-    arXiv + Semantic Scholar 抓取 · Kimi AI 分析 · 每日自动推送<br>
+    arXiv + Semantic Scholar 抓取 · LLM AI 分析 · 每日自动推送<br>
     权重曲线：直接相关性峰值月初/月末 · 创新性峰值第10天 · 视野拓展峰值第20天
   </div>
 </div>

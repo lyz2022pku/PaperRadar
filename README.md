@@ -1,4 +1,21 @@
-# PaperRadar - 部署指南
+# PaperRadar
+
+PaperRadar 是一个全自动的每日学术论文推送系统，从 arXiv 和 Semantic Scholar 抓取论文，通过 LLM 三维评分后，将精选结果以 HTML 邮件形式每日推送到你的邮箱。
+
+## 设计亮点
+
+**1. 两级关键词体系**
+核心关键词（core）直接映射研究主线，命中即高度相关；扩展关键词（broad）覆盖周边领域，用于期刊粗筛但不参与 arXiv 查询。这种分层设计在保持聚焦的同时，不错过有启发价值的边缘工作。
+
+**2. 三维评分系统**
+每篇论文从直接相关性（A）、创新性（B）、视野拓展性（C）三个维度独立评分（1–5分），避免单一指标下"相关但不创新"或"创新但不相关"的论文互相掩盖。
+
+**3. 动态权重调整**
+三个维度的合成权重随月份日期按正弦曲线平滑变化，每月自然形成"聚焦→开拓→聚焦"的推送节奏。既防止推送风格固化，又帮助科研人员在深耕主线与开阔视野之间保持平衡。
+
+---
+
+# 部署指南
 
 ## 项目结构
 
@@ -70,7 +87,8 @@ settings:
   schedule_hour: 8             # 每天几点运行（本地时间，24小时制）
   schedule_minute: 0
 
-# Semantic Scholar API Key（可留空，填写后请求量更大）
+# Semantic Scholar API Key（可留空，可能导致检索不到IEEE相关论文。该api免费申请，申请后足够个人使用）
+# 申请地址：https://www.semanticscholar.org/product/api
 semantic_scholar:
   api_key: ""
 ```

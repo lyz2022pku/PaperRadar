@@ -3,7 +3,7 @@
 PaperRadar 主程序
 用法:
   python main.py            # 正常运行
-  python main.py --test     # 测试模式（只抓少量，跳过Kimi，不发邮件）
+  python main.py --test     # 测试模式（只抓少量，跳过 LLM 分析，不发邮件）
   python main.py --send-test  # 发送测试邮件验证配置
 """
 
@@ -135,7 +135,7 @@ def run(test_mode: bool = False, send_test: bool = False):
     new_papers = [p for p in all_papers if p["id"] not in sent_ids]
     logger.info(f"去除已推送后：{len(new_papers)} 篇待处理（共抓取 {len(all_papers)} 篇）")
 
-    # ── 步骤3：命中缓存 vs 需要Kimi分析 ───────────────────────────────────────
+    # ── 步骤3：命中缓存 vs 需要LLM分析 ────────────────────────────────────────
     cached_papers = []
     need_kimi     = []
     for p in new_papers:
@@ -147,7 +147,7 @@ def run(test_mode: bool = False, send_test: bool = False):
 
     logger.info(f"命中缓存：{len(cached_papers)} 篇 | 需要LLM分析：{len(need_kimi)} 篇")
 
-    # ── 步骤4：Kimi分析 ────────────────────────────────────────────────────────
+    # ── 步骤4：LLM分析 ─────────────────────────────────────────────────────────
     newly_analyzed = []
     if not test_mode and need_kimi:
         logger.info(f"步骤3: 调用 LLM API 分析 {len(need_kimi)} 篇论文...")
@@ -172,7 +172,7 @@ def run(test_mode: bool = False, send_test: bool = False):
         save_cache(cache)
         logger.info(f"分析缓存已更新：共 {len(cache)} 篇")
     elif test_mode:
-        logger.info("测试模式：跳过 Kimi 分析")
+        logger.info("测试模式：跳过 LLM 分析")
         for p in need_kimi[:3]:
             p.update({"analysis": "【测试】跳过分析",
                       "score_a": 3, "score_b": 3, "score_c": 3, "filtered": False})
