@@ -44,19 +44,34 @@ cp ~/paperradar/config/config.yaml.example ~/paperradar/config/config.yaml
 nano ~/paperradar/config/config.yaml
 ```
 
-需要填写的三处内容：
+需要填写的关键内容：
 
 ```yaml
+# AI 分析接口（兼容 OpenAI 格式，Kimi / DeepSeek 等均可）
 kimi:
-  api_key: "sk-你的Kimi API Key"
+  api_key: "sk-你的API Key"
+  model: "your-model-name"    # 例如 kimi-k2-0905-preview、deepseek-chat
 
+# 邮件配置（支持 QQ / Gmail / 163 等 SMTP 服务）
+# QQ 邮箱:  smtp.qq.com   端口 465  （使用邮箱授权码，非QQ密码）
+# Gmail:    smtp.gmail.com 端口 587  （使用应用专用密码）
+# 163 邮箱: smtp.163.com  端口 465
 email:
-  sender: "你的QQ号@qq.com"
-  password: "你的QQ邮箱授权码"    # 不是QQ密码，是邮箱授权码
+  smtp_server: "smtp.qq.com"
+  smtp_port: 465
+  sender: "你的发件邮箱"
+  password: "邮箱授权码/应用密码"
   recipient: "收件人邮箱"
 
+# 时区与运行时间
+settings:
+  timezone: "Asia/Shanghai"    # 时区，北京时间填 Asia/Shanghai
+  schedule_hour: 8             # 每天几点运行（本地时间，24小时制）
+  schedule_minute: 0
+
+# Semantic Scholar API Key（可留空，填写后请求量更大）
 semantic_scholar:
-  api_key: "你的Semantic Scholar API Key"   # 可选
+  api_key: ""
 ```
 
 填写完成后，按 `Ctrl+O` 保存，`Ctrl+X` 退出。
@@ -120,7 +135,7 @@ python main.py
 
 ### 修改推送时间
 
-编辑 `config/config.yaml` 中的 `schedule_hour`，然后重新运行：
+编辑 `config/config.yaml` 中的 `schedule_hour` 和 `schedule_minute`，然后重新运行：
 
 ```bash
 bash setup_server.sh
