@@ -80,6 +80,7 @@ def run(test_mode: bool = False, send_test: bool = False):
     broad_keywords = config["keywords"]["broad"]
     kimi_cfg      = config["llm"]
     ss_cfg        = config.get("semantic_scholar", {})
+    user_cfg      = config.get("user", {})
 
     # ── 发送测试邮件 ───────────────────────────────────────────────────────────
     if send_test:
@@ -159,6 +160,8 @@ def run(test_mode: bool = False, send_test: bool = False):
             broad_keywords=broad_keywords,
             max_tokens=kimi_cfg.get("max_tokens", 500),
             base_url=kimi_cfg.get("base_url") or None,
+            user_name=user_cfg.get("name", ""),
+            user_profile=user_cfg.get("profile", ""),
         )
         for p in newly_analyzed:
             cache[p["id"]] = {

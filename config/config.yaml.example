@@ -4,6 +4,15 @@
 #  cp config/config.yaml.example config/config.yaml
 # ============================================================
 
+# --- 用户信息（用于个性化 LLM 筛选 prompt）---
+# name:    可选，填写后 prompt 中会使用你的名字（留空则省略称谓）
+# profile: 描述你的研究背景，直接影响 LLM 的相关性和视野评分质量
+#          建议用一句话写清楚：方向、阶段、关注点
+user:
+  name: ""                          # 例如 "Alex"（可留空）
+  profile: "your research background here"
+                                    # 例如 "a PhD student in semiconductor devices and integrated circuits"
+
 # --- LLM API（兼容 OpenAI 接口格式，支持 OpenAI / Kimi / DeepSeek / 通义千问等）---
 llm:
   api_key: "sk-your-api-key-here"
