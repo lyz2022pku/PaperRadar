@@ -1,0 +1,29 @@
+# Claude Code 指令文件（仅本地使用）
+CLAUDE.md
+
+# 虚拟环境
+venv/
+
+# 运行输出（含缓存、已发送记录、每日快照）
+output/
+
+# 日志
+logs/
+
+# 真实配置文件（含API Key和邮箱密码，禁止上传）
+config/config.yaml
+
+# Python缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# Windows区域标识符（从Windows复制文件时产生）
+*.Identifier
+Zone.Identifier
+*Zone.Identifier
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
