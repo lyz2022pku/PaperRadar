@@ -5,11 +5,11 @@
 ```
 paperradar/
 ├── config/
-│   ├── config.yaml.example    ← 配置模板（上传到 GitHub）
-│   └── config.yaml            ← 真实配置（本地填写，不上传）
+│   ├── config.yaml.example    ← 配置模板，含所有参数说明
+│   └── config.yaml            ← 你的实际配置（从 example 复制后填写）
 ├── src/
 │   ├── fetcher.py             ← 论文抓取（arXiv + Semantic Scholar）
-│   ├── analyzer.py            ← Kimi AI 分析
+│   ├── analyzer.py            ← LLM AI 分析
 │   └── mailer.py              ← HTML 邮件发送
 ├── logs/                      ← 运行日志（自动生成）
 ├── output/                    ← 每日结果JSON（自动生成）
@@ -31,7 +31,7 @@ ssh 你的用户名@你的服务器IP
 ### 第二步：克隆代码
 
 ```bash
-git clone https://github.com/你的用户名/paperradar.git ~/paperradar
+git clone https://github.com/lyz2022pku/paperradar.git ~/paperradar
 ```
 
 ### 第三步：填写配置文件
@@ -47,10 +47,11 @@ nano ~/paperradar/config/config.yaml
 需要填写的关键内容：
 
 ```yaml
-# AI 分析接口（兼容 OpenAI 格式，Kimi / DeepSeek 等均可）
-kimi:
+# LLM API（兼容 OpenAI 格式，支持 OpenAI / Kimi / DeepSeek / 通义千问等）
+llm:
   api_key: "sk-你的API Key"
-  model: "your-model-name"    # 例如 kimi-k2-0905-preview、deepseek-chat
+  model: "your-model-name"    # 例如 gpt-4o、kimi-k2-0905-preview、deepseek-chat
+  base_url: ""                # 留空使用 OpenAI 官方；Kimi 填 https://api.moonshot.cn/v1
 
 # 邮件配置（支持 QQ / Gmail / 163 等 SMTP 服务）
 # QQ 邮箱:  smtp.qq.com   端口 465  （使用邮箱授权码，非QQ密码）
@@ -97,7 +98,7 @@ source venv/bin/activate
 # 发送测试邮件，验证 SMTP 配置
 python main.py --send-test
 
-# 手动运行一次完整流程（测试模式，不调用Kimi，不发邮件）
+# 手动运行一次完整流程（测试模式，不调用 LLM API，不发邮件）
 python main.py --test
 ```
 
@@ -150,10 +151,10 @@ bash setup_server.sh
 - 运行 `python main.py --send-test` 验证SMTP配置
 - 查看日志文件确认是否有报错
 
-**Q: Kimi API 报错？**
-- 确认 API Key 是否正确
+**Q: LLM API 报错？**
+- 确认 `api_key` 和 `base_url` 是否填写正确
 - 检查账户余额是否充足
-- Kimi 免费层限制约3次/分钟，脚本已自动处理重试
+- 遇到限流（429）时脚本会自动退避重试，无需手动处理
 
 **Q: 如何添加新的关键词？**
 - 编辑 `config/config.yaml` 中的 `keywords` 列表，直接添加即可

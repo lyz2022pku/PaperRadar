@@ -98,17 +98,18 @@ def analyze_papers_with_kimi(papers: List[Dict],
                               model: str,
                               core_keywords: List[str],
                               broad_keywords: List[str],
-                              max_tokens: int = 500) -> List[Dict]:
+                              max_tokens: int = 500,
+                              base_url: str = None) -> List[Dict]:
     if not papers:
         return []
 
-    client = OpenAI(api_key=api_key, base_url="https://api.moonshot.cn/v1")
+    client = OpenAI(api_key=api_key, base_url=base_url) if base_url else OpenAI(api_key=api_key)
     system_prompt = build_system_prompt(core_keywords, broad_keywords)
     analyzed = []
     total = len(papers)
 
     for i, paper in enumerate(papers):
-        logger.info(f"Kimi分析 [{i+1}/{total}]: {paper['title'][:55]}...")
+        logger.info(f"LLM分析 [{i+1}/{total}]: {paper['title'][:55]}...")
         user_prompt = USER_PROMPT_TEMPLATE.format(
             title=paper["title"],
             venue=paper["venue"],
@@ -152,5 +153,5 @@ def analyze_papers_with_kimi(papers: List[Dict],
                     time.sleep(5)
                     break
 
-    logger.info(f"Kimi分析完成：{len(analyzed)}/{total} 篇")
+    logger.info(f"LLM分析完成：{len(analyzed)}/{total} 篇")
     return analyzed

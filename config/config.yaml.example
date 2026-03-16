@@ -4,11 +4,14 @@
 #  cp config/config.yaml.example config/config.yaml
 # ============================================================
 
-# --- AI 分析 API（兼容 OpenAI 接口格式）---
-# 示例：Kimi / DeepSeek / 其他兼容 OpenAI 的模型均可
-kimi:
+# --- LLM API（兼容 OpenAI 接口格式，支持 OpenAI / Kimi / DeepSeek / 通义千问等）---
+llm:
   api_key: "sk-your-api-key-here"
-  model: "your-model-name"          # 例如 kimi-k2-0905-preview、deepseek-chat
+  model: "your-model-name"          # 例如 gpt-4o、kimi-k2-0905-preview、deepseek-chat
+  base_url: ""                      # 留空使用 OpenAI 官方接口，其他服务商填写对应地址：
+                                    #   Kimi:     https://api.moonshot.cn/v1
+                                    #   DeepSeek: https://api.deepseek.com/v1
+                                    #   通义千问:  https://dashscope.aliyuncs.com/compatible-mode/v1
   max_tokens: 1500
 
 # --- 邮件配置 ---

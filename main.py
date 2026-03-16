@@ -78,7 +78,7 @@ def run(test_mode: bool = False, send_test: bool = False):
     config        = load_config()
     core_keywords = config["keywords"]["core"]
     broad_keywords = config["keywords"]["broad"]
-    kimi_cfg      = config["kimi"]
+    kimi_cfg      = config["llm"]
     ss_cfg        = config.get("semantic_scholar", {})
 
     # ── 发送测试邮件 ───────────────────────────────────────────────────────────
@@ -145,12 +145,12 @@ def run(test_mode: bool = False, send_test: bool = False):
         else:
             need_kimi.append(p)
 
-    logger.info(f"命中缓存：{len(cached_papers)} 篇 | 需要Kimi分析：{len(need_kimi)} 篇")
+    logger.info(f"命中缓存：{len(cached_papers)} 篇 | 需要LLM分析：{len(need_kimi)} 篇")
 
     # ── 步骤4：Kimi分析 ────────────────────────────────────────────────────────
     newly_analyzed = []
     if not test_mode and need_kimi:
-        logger.info(f"步骤3: 调用 Kimi API 分析 {len(need_kimi)} 篇论文...")
+        logger.info(f"步骤3: 调用 LLM API 分析 {len(need_kimi)} 篇论文...")
         newly_analyzed = analyze_papers_with_kimi(
             papers=need_kimi,
             api_key=kimi_cfg["api_key"],
@@ -158,6 +158,7 @@ def run(test_mode: bool = False, send_test: bool = False):
             core_keywords=core_keywords,
             broad_keywords=broad_keywords,
             max_tokens=kimi_cfg.get("max_tokens", 500),
+            base_url=kimi_cfg.get("base_url") or None,
         )
         for p in newly_analyzed:
             cache[p["id"]] = {
