@@ -13,6 +13,9 @@ PaperRadar 是一个全自动的每日学术论文推送系统，从 arXiv 和 S
 **3. 动态权重调整**
 三个维度的合成权重随月份日期按正弦曲线平滑变化，每月自然形成"聚焦→开拓→聚焦"的推送节奏。既防止推送风格固化，又帮助科研人员在深耕主线与开阔视野之间保持平衡。
 
+**4. 个性化研究背景配置**
+在 `config.yaml` 中填写自己的研究背景描述，系统会将其注入 LLM 的 system prompt，使相关性和视野评分真正以你的研究视角为基准，而非泛化判断。无需修改任何代码。
+
 ---
 
 # 部署指南
@@ -61,36 +64,68 @@ cp ~/paperradar/config/config.yaml.example ~/paperradar/config/config.yaml
 nano ~/paperradar/config/config.yaml
 ```
 
-需要填写的关键内容：
+需要填写/修改的关键内容：
 
+**① 用户研究背景（影响 LLM 评分视角，建议认真填写）**
 ```yaml
-# LLM API（兼容 OpenAI 格式，支持 OpenAI / Kimi / DeepSeek / 通义千问等）
+user:
+  name: "你的名字"          # 可留空
+  profile: "your research background"
+  # 例如 "a PhD student focusing on 3D IC integration and oxide semiconductor devices"
+```
+
+**② LLM API**
+```yaml
 llm:
   api_key: "sk-你的API Key"
   model: "your-model-name"    # 例如 gpt-4o、kimi-k2-0905-preview、deepseek-chat
   base_url: ""                # 留空使用 OpenAI 官方；Kimi 填 https://api.moonshot.cn/v1
+```
 
-# 邮件配置（支持 QQ / Gmail / 163 等 SMTP 服务）
-# QQ 邮箱:  smtp.qq.com   端口 465  （使用邮箱授权码，非QQ密码）
-# Gmail:    smtp.gmail.com 端口 587  （使用应用专用密码）
-# 163 邮箱: smtp.163.com  端口 465
+**③ 关键词（直接决定抓什么论文、怎么打分，务必替换为自己的方向）**
+```yaml
+keywords:
+  core:                       # 核心关键词：命中即高度相关，A 分可达 4-5
+    - "your core keyword 1"
+    - "your core keyword 2"
+  broad:                      # 扩展关键词：覆盖周边领域，A 分上限 3 分
+    - "your broad keyword 1"
+    - "your broad keyword 2"
+```
+
+**④ 目标期刊/会议（Semantic Scholar 来源，替换为你关注的刊物）**
+```yaml
+semantic_scholar:
+  api_key: ""                 # 可留空，但留空可能导致检索不到 IEEE 相关论文
+                              # 建议免费申请：https://www.semanticscholar.org/product/api
+  target_venues:
+    - "Nature Electronics"
+    - "IEEE Transactions on Electron Devices"
+    - "IEDM"
+    # ... 替换/补充为你关注的期刊或会议全名
+```
+
+**⑤ arXiv 订阅类别（替换为与你方向相关的分类）**
+```yaml
+arxiv:
+  categories:
+    - "cs.AR"     # 完整列表见 https://arxiv.org/category_taxonomy
+    - "cs.ET"
+```
+
+**⑥ 邮件与时间**
+```yaml
 email:
-  smtp_server: "smtp.qq.com"
+  smtp_server: "smtp.qq.com"   # QQ:smtp.qq.com 465 | Gmail:smtp.gmail.com 587
   smtp_port: 465
   sender: "你的发件邮箱"
   password: "邮箱授权码/应用密码"
   recipient: "收件人邮箱"
 
-# 时区与运行时间
 settings:
-  timezone: "Asia/Shanghai"    # 时区，北京时间填 Asia/Shanghai
-  schedule_hour: 8             # 每天几点运行（本地时间，24小时制）
+  timezone: "Asia/Shanghai"
+  schedule_hour: 8
   schedule_minute: 0
-
-# Semantic Scholar API Key（可留空，可能导致检索不到IEEE相关论文。该api免费申请，申请后足够个人使用）
-# 申请地址：https://www.semanticscholar.org/product/api
-semantic_scholar:
-  api_key: ""
 ```
 
 填写完成后，按 `Ctrl+O` 保存，`Ctrl+X` 退出。
