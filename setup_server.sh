@@ -13,17 +13,33 @@ echo "================================================"
 
 INSTALL_DIR="$HOME/paperradar"
 
-# 步骤1：安装 Python3 和 pip
+# 步骤1：检查 Python3 版本（需要 3.7+）
 echo ""
 echo "▶ 步骤1/4: 检查并安装 Python3..."
-if ! command -v python3 &>/dev/null; then
-    echo "  Python3 未安装，正在安装..."
+
+# 优先选用较新版本
+PYTHON_BIN=""
+for candidate in python3.12 python3.11 python3.10 python3.9 python3.8 python3.7 python3; do
+    if command -v "$candidate" &>/dev/null; then
+        ver=$("$candidate" -c "import sys; print(sys.version_info[:2])")
+        if "$candidate" -c "import sys; sys.exit(0 if sys.version_info >= (3,7) else 1)" 2>/dev/null; then
+            PYTHON_BIN="$candidate"
+            break
+        fi
+    fi
+done
+
+if [ -z "$PYTHON_BIN" ]; then
+    echo "  ❌ 未找到 Python 3.7+，正在尝试安装 Python3.10..."
     sudo apt-get update -qq
-    sudo apt-get install -y python3 python3-pip python3-venv
-else
-    PYTHON_VER=$(python3 --version)
-    echo "  ✅ Python3 已安装: $PYTHON_VER"
+    sudo apt-get install -y software-properties-common
+    sudo add-apt-repository -y ppa:deadsnakes/ppa
+    sudo apt-get update -qq
+    sudo apt-get install -y python3.10 python3.10-venv python3.10-distutils
+    PYTHON_BIN="python3.10"
 fi
+
+echo "  ✅ 使用 Python: $PYTHON_BIN ($($PYTHON_BIN --version))"
 
 # 步骤2：检查配置文件
 echo ""
@@ -48,7 +64,7 @@ echo "▶ 步骤3/4: 安装 Python 依赖..."
 cd "$INSTALL_DIR"
 
 if [ ! -d "venv" ]; then
-    python3 -m venv venv
+    $PYTHON_BIN -m venv venv
     echo "  虚拟环境创建完成"
 fi
 
