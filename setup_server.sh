@@ -99,7 +99,8 @@ TIMEZONE=$(echo "$SCHEDULE" | sed -n '1p')
 HOUR=$(echo "$SCHEDULE"     | sed -n '2p')
 MINUTE=$(echo "$SCHEDULE"   | sed -n '3p')
 
-CRON_JOB="$MINUTE $HOUR * * * cd $INSTALL_DIR && TZ=$TIMEZONE $INSTALL_DIR/venv/bin/python main.py >> $INSTALL_DIR/logs/cron.log 2>&1"
+mkdir -p "$INSTALL_DIR/logs"
+CRON_JOB="$MINUTE $HOUR * * * mkdir -p $INSTALL_DIR/logs && cd $INSTALL_DIR && TZ=$TIMEZONE $INSTALL_DIR/venv/bin/python main.py >> $INSTALL_DIR/logs/cron.log 2>&1"
 CRONTAB_TMP=$(mktemp)
 
 # 移除旧的 paperradar 定时任务（如有）
