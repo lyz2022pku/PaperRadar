@@ -80,40 +80,59 @@ touch "$INSTALL_DIR/src/__init__.py"
 echo ""
 echo "▶ 步骤4/4: 配置定时任务..."
 
-# 从 config.yaml 读取时间和时区配置
+# 从 config.yaml 读取时间和时区配置，并转换为 UTC 时间写入 cron
 SCHEDULE=$(source "$INSTALL_DIR/venv/bin/activate" && python3 - <<'EOF'
 import yaml, sys
+from datetime import datetime, timezone, timedelta
 try:
     with open("config/config.yaml") as f:
         c = yaml.safe_load(f)
     s = c.get("settings", {})
-    print(s.get("timezone", "UTC"))
-    print(s.get("schedule_hour", 8))
-    print(s.get("schedule_minute", 0))
+    tz_name = s.get("timezone", "UTC")
+    hour    = int(s.get("schedule_hour", 8))
+    minute  = int(s.get("schedule_minute", 0))
+
+    # 将本地时间转换为 UTC（不依赖 pytz/zoneinfo，使用 Python 标准库）
+    try:
+        from zoneinfo import ZoneInfo          # Python 3.9+
+        tz = ZoneInfo(tz_name)
+    except ImportError:
+        import zoneinfo                        # fallback: same module different path
+        tz = zoneinfo.ZoneInfo(tz_name)
+
+    local_dt = datetime(2024, 1, 15, hour, minute, tzinfo=tz)
+    utc_dt   = local_dt.astimezone(timezone.utc)
+    print(tz_name)
+    print(hour)
+    print(minute)
+    print(utc_dt.hour)
+    print(utc_dt.minute)
 except Exception as e:
-    print("UTC"); print(8); print(0)
+    print("UTC"); print(8); print(0); print(8); print(0)
 EOF
 )
 
-TIMEZONE=$(echo "$SCHEDULE" | sed -n '1p')
-HOUR=$(echo "$SCHEDULE"     | sed -n '2p')
-MINUTE=$(echo "$SCHEDULE"   | sed -n '3p')
+TIMEZONE=$(echo "$SCHEDULE"  | sed -n '1p')
+HOUR=$(echo "$SCHEDULE"      | sed -n '2p')
+MINUTE=$(echo "$SCHEDULE"    | sed -n '3p')
+UTC_HOUR=$(echo "$SCHEDULE"  | sed -n '4p')
+UTC_MINUTE=$(echo "$SCHEDULE"| sed -n '5p')
 
 mkdir -p "$INSTALL_DIR/logs"
-CRON_JOB="$MINUTE $HOUR * * * mkdir -p $INSTALL_DIR/logs && cd $INSTALL_DIR && TZ=$TIMEZONE $INSTALL_DIR/venv/bin/python main.py >> $INSTALL_DIR/logs/cron.log 2>&1"
+# 使用 UTC 时间写入 cron（避免 CRON_TZ 在部分系统上不生效的问题）
+CRON_JOB="$UTC_MINUTE $UTC_HOUR * * * mkdir -p $INSTALL_DIR/logs && cd $INSTALL_DIR && TZ=$TIMEZONE $INSTALL_DIR/venv/bin/python main.py >> $INSTALL_DIR/logs/cron.log 2>&1"
 CRONTAB_TMP=$(mktemp)
 
 # 移除旧的 paperradar 定时任务（如有）
 crontab -l 2>/dev/null | grep -v "paperradar" > "$CRONTAB_TMP" || true
 
-# 写入时区环境变量 + 定时任务
-echo "# paperradar"                 >> "$CRONTAB_TMP"
-echo "CRON_TZ=$TIMEZONE"            >> "$CRONTAB_TMP"
-echo "$CRON_JOB"                    >> "$CRONTAB_TMP"
+# 写入定时任务（用 UTC 时间，不依赖 CRON_TZ）
+echo "# paperradar"  >> "$CRONTAB_TMP"
+echo "$CRON_JOB"     >> "$CRONTAB_TMP"
 crontab "$CRONTAB_TMP"
 rm "$CRONTAB_TMP"
 
-echo "  ✅ 定时任务已设置：每天 ${HOUR}:$(printf '%02d' $MINUTE)（$TIMEZONE 时间）运行"
+echo "  ✅ 定时任务已设置：每天 ${HOUR}:$(printf '%02d' $MINUTE)（$TIMEZONE / UTC ${UTC_HOUR}:$(printf '%02d' $UTC_MINUTE)）运行"
 
 # 完成
 echo ""
@@ -131,4 +150,5 @@ echo "  2. 手动运行一次完整流程（测试模式）："
 echo "     python main.py --test"
 echo ""
 echo "  之后程序会在每天 ${HOUR}:$(printf '%02d' $MINUTE)（$TIMEZONE 时间）自动运行 ✅"
+echo "  对应 UTC 时间：${UTC_HOUR}:$(printf '%02d' $UTC_MINUTE)"
 echo ""
