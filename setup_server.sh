@@ -80,43 +80,36 @@ touch "$INSTALL_DIR/src/__init__.py"
 echo ""
 echo "▶ 步骤4/4: 配置定时任务..."
 
-# 从 config.yaml 读取时间和时区配置，并转换为 UTC 时间写入 cron
+# 从 config.yaml 读取时间和时区配置
 SCHEDULE=$(source "$INSTALL_DIR/venv/bin/activate" && python3 - <<'EOF'
 import yaml, sys
-from datetime import datetime, timezone, timedelta
 try:
     with open("config/config.yaml") as f:
         c = yaml.safe_load(f)
     s = c.get("settings", {})
-    tz_name = s.get("timezone", "UTC")
-    hour    = int(s.get("schedule_hour", 8))
-    minute  = int(s.get("schedule_minute", 0))
-
-    # 将本地时间转换为 UTC（不依赖 pytz/zoneinfo，使用 Python 标准库）
-    try:
-        from zoneinfo import ZoneInfo          # Python 3.9+
-        tz = ZoneInfo(tz_name)
-    except ImportError:
-        import zoneinfo                        # fallback: same module different path
-        tz = zoneinfo.ZoneInfo(tz_name)
-
-    local_dt = datetime(2024, 1, 15, hour, minute, tzinfo=tz)
-    utc_dt   = local_dt.astimezone(timezone.utc)
-    print(tz_name)
-    print(hour)
-    print(minute)
-    print(utc_dt.hour)
-    print(utc_dt.minute)
+    print(s.get("timezone", "UTC"))
+    print(s.get("schedule_hour", 8))
+    print(s.get("schedule_minute", 0))
 except Exception as e:
-    print("UTC"); print(8); print(0); print(8); print(0)
+    print("UTC"); print(8); print(0)
 EOF
 )
 
-TIMEZONE=$(echo "$SCHEDULE"  | sed -n '1p')
-HOUR=$(echo "$SCHEDULE"      | sed -n '2p')
-MINUTE=$(echo "$SCHEDULE"    | sed -n '3p')
-UTC_HOUR=$(echo "$SCHEDULE"  | sed -n '4p')
-UTC_MINUTE=$(echo "$SCHEDULE"| sed -n '5p')
+TIMEZONE=$(echo "$SCHEDULE" | sed -n '1p')
+HOUR=$(echo "$SCHEDULE"     | sed -n '2p')
+MINUTE=$(echo "$SCHEDULE"   | sed -n '3p')
+
+# 用系统 date 命令将本地时间转换为 UTC（兼容所有 Python 版本）
+UTC_TIME=$(TZ=UTC date -d "TZ=\"$TIMEZONE\" $(printf '%02d:%02d' $HOUR $MINUTE)" "+%H %M" 2>/dev/null)
+if [ -n "$UTC_TIME" ]; then
+    UTC_HOUR=$(echo "$UTC_TIME"   | awk '{print $1}')
+    UTC_MINUTE=$(echo "$UTC_TIME" | awk '{print $2}')
+else
+    # fallback：date 命令不支持时，警告用户手动确认
+    echo "  ⚠️  无法自动转换时区，cron 将使用系统时区执行，请手动确认服务器时区。"
+    UTC_HOUR=$HOUR
+    UTC_MINUTE=$MINUTE
+fi
 
 mkdir -p "$INSTALL_DIR/logs"
 # 使用 UTC 时间写入 cron（避免 CRON_TZ 在部分系统上不生效的问题）
